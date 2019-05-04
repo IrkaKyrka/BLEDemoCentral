@@ -15,8 +15,9 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     let brightnesCharacteristicUUID  = CBUUID(string: "08590F7E-DB05-467E-8757-72F6F66666D4")
     let modelNameCharacteristicUUID = CBUUID(string: "0c74d200-DB05-467E-8757-72F6F66666D4")
     var brightnes: Float = 0
+    var caracteristic: CBCharacteristic!
     
-    var peripheral : CBPeripheral!
+    var peripheral: CBPeripheral!
     var centralManager: CBCentralManager!
     
     @IBOutlet weak var modelNameLabel: UILabel!
@@ -34,7 +35,8 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
     @IBAction func brightnesSlider(_ sender: UISlider) {
         
         self.brightnes = sender.value
-        self.centralManager.scanForPeripherals(withServices: [self.serviceUUID], options: nil)
+        let data = withUnsafeBytes(of: brightnes) { Data($0) }
+        self.peripheral.writeValue(data, for: self.caracteristic, type: .withResponse)
     }
     
     @IBAction func tappedStartConnect(_ sender: UIButton) {
@@ -105,6 +107,7 @@ class ViewController: UIViewController, CBCentralManagerDelegate, CBPeripheralDe
                 self.peripheral.readValue(for: c)
             }
             if c.uuid.isEqual(self.brightnesCharacteristicUUID) {
+                self.caracteristic = c
                 let data = withUnsafeBytes(of: brightnes) { Data($0) }
                 self.peripheral.writeValue(data, for: c, type: .withResponse)
             }
